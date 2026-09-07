@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f7f9;
+  --foreground: #101828;
+  --card: #ffffff;
+  --card-foreground: #101828;
+  --border: #e2e5ea;
+  --muted: #667085;
+  --muted-bg: #eef0f3;
+
+  /* Paleta institucional neutra — reemplazar por los colores oficiales de
+     ITSON cuando estén disponibles (no se asumen aquí para no inventar
+     identidad visual que el documento no proporcionó). */
+  --primary: #1e3a5f;
+  --primary-foreground: #ffffff;
+  --primary-hover: #16304e;
+  --accent: #2563a3;
+
+  --success: #16803c;
+  --success-bg: #e7f5ec;
+  --warning: #92400e;
+  --warning-bg: #fef3c7;
+  --danger: #b42318;
+  --danger-bg: #fef2f2;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-bg: var(--muted-bg);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

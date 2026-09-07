@@ -1,0 +1,269 @@
+// Directorio Telefónico ITSON — esquema de base de datos (PostgreSQL / Neon)
+// Ver docs/DATABASE.md para el razonamiento detrás de cada decisión de modelado.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Campus / Edificio / Ubicación
+// ---------------------------------------------------------------------------
+
+model Campus {
+  id        String   @id @default(cuid())
+  nombre    String
+  clave     String   @unique
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  edificios Edificio[]
+
+  @@map("campus")
+}
+
+model Edificio {
+  id          String   @id @default(cuid())
+  campusId    String
+  nombre      String
+  clave       String?
+  descripcion String?
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  campus      Campus      @relation(fields: [campusId], references: [id])
+  ubicaciones Ubicacion[]
+
+  @@index([campusId])
+  @@map("edificios")
+}
+
+enum TipoUbicacion {
+  OFICINA
+  CUBICULO
+  AULA
+  VENTANILLA
+  LABORATORIO
+  SITE
+  AREA
+  OTRO
+}
+
+/// EdificioId es opcional a propósito: muchos registros de origen (ver seed)
+/// identifican un cubículo/aula sin indicar el edificio al que pertenece, y la
+/// regla de negocio (spec sección 22) prohíbe inferir/asignar un edificio que
+/// no esté explícito en los datos. La combinación (edificioId, tipo, numero)
+/// NO es única globalmente ("Cubículo 1" se repite en distintos espacios) —
+/// solo debe considerarse "el mismo lugar" cuando comparte edificio.
+model Ubicacion {
+  id          String        @id @default(cuid())
+  edificioId  String?
+  tipo        TipoUbicacion
+  nombre      String?
+  numero      String?
+  piso        String?
+  descripcion String?
+  activo      Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  edificio     Edificio?              @relation(fields: [edificioId], references: [id])
+  asignaciones AsignacionExtension[]
+
+  @@index([edificioId])
+  @@index([tipo])
+  @@map("ubicaciones")
+}
+
+// ---------------------------------------------------------------------------
+// Área / Puesto / Persona
+// ---------------------------------------------------------------------------
+
+model Area {
+  id          String   @id @default(cuid())
+  nombre      String
+  descripcion String?
+  areaPadreId String?
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  areaPadre    Area?                  @relation("AreaJerarquia", fields: [areaPadreId], references: [id])
+  subareas     Area[]                 @relation("AreaJerarquia")
+  personas     Persona[]
+  asignaciones AsignacionExtension[]
+
+  @@index([areaPadreId])
+  @@map("areas")
+}
+
+model Puesto {
+  id          String   @id @default(cuid())
+  nombre      String   @unique
+  descripcion String?
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  personas Persona[]
+
+  @@map("puestos")
+}
+
+/// No depender solo de nombreCompleto para buscar: los componentes del
+/// nombre se guardan por separado y también se indexan. nombreCompleto se
+/// almacena (no se deriva en cada lectura) para que la búsqueda libre pueda
+/// hacer un solo `contains` sobre un campo ya normalizado a texto plano.
+model Persona {
+  id              String   @id @default(cuid())
+  nombre          String
+  apellidoPaterno String?
+  apellidoMaterno String?
+  nombreCompleto  String
+  correo          String?
+  puestoId        String?
+  areaId          String?
+  activo          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  puesto       Puesto?                @relation(fields: [puestoId], references: [id])
+  area         Area?                  @relation(fields: [areaId], references: [id])
+  asignaciones AsignacionExtension[]
+
+  @@index([nombreCompleto])
+  @@index([apellidoPaterno])
+  @@index([areaId])
+  @@index([puestoId])
+  @@map("personas")
+}
+
+// ---------------------------------------------------------------------------
+// Extensión / Asignación
+// ---------------------------------------------------------------------------
+
+enum EstadoExtension {
+  ACTIVA
+  INACTIVA
+  SIN_ASIGNAR
+  MANTENIMIENTO
+  RESERVADA
+}
+
+model Extension {
+  id            String          @id @default(cuid())
+  numero        String          @unique
+  tipo          String?
+  estado        EstadoExtension @default(SIN_ASIGNAR)
+  observaciones String?
+  activo        Boolean         @default(true)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  asignaciones AsignacionExtension[]
+
+  @@index([estado])
+  @@map("extensiones")
+}
+
+/// Tabla central (spec 5.8). TipoAsignacion (spec 24) distingue si la
+/// extensión es de una persona, compartida por varias, de un área/servicio
+/// sin dueño individual, o sin persona en absoluto — esto evita inventar
+/// estructura que los datos de origen no dan (p. ej. grupos como
+/// "Rosy – Elvia" se modelan como varias filas Compartida, no como una sola
+/// Persona inventada).
+enum TipoAsignacion {
+  INDIVIDUAL
+  COMPARTIDA
+  AREA_SERVICIO
+  SIN_PERSONA
+}
+
+model AsignacionExtension {
+  id             String         @id @default(cuid())
+  extensionId    String
+  personaId      String?
+  areaId         String?
+  ubicacionId    String?
+  tipoAsignacion TipoAsignacion @default(INDIVIDUAL)
+  fechaInicio    DateTime       @default(now())
+  fechaFin       DateTime?
+  esPrincipal    Boolean        @default(true)
+  activo         Boolean        @default(true)
+  observaciones  String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  extension Extension @relation(fields: [extensionId], references: [id])
+  persona   Persona?  @relation(fields: [personaId], references: [id])
+  area      Area?     @relation(fields: [areaId], references: [id])
+  ubicacion Ubicacion? @relation(fields: [ubicacionId], references: [id])
+
+  @@index([extensionId])
+  @@index([personaId])
+  @@index([areaId])
+  @@index([ubicacionId])
+  @@map("asignaciones_extension")
+}
+
+// ---------------------------------------------------------------------------
+// Usuario / Historial
+// ---------------------------------------------------------------------------
+
+enum RolUsuario {
+  ADMINISTRADOR
+  CAPTURISTA
+  CONSULTA
+}
+
+model Usuario {
+  id           String     @id @default(cuid())
+  nombre       String
+  correo       String     @unique
+  passwordHash String
+  rol          RolUsuario @default(CONSULTA)
+  activo       Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  historial HistorialCambios[]
+
+  @@map("usuarios")
+}
+
+enum AccionHistorial {
+  CREAR
+  ACTUALIZAR
+  DESACTIVAR
+  ASIGNAR
+  DESASIGNAR
+  IMPORTAR
+}
+
+model HistorialCambios {
+  id                String          @id @default(cuid())
+  entidad           String
+  entidadId         String
+  accion            AccionHistorial
+  valoresAnteriores Json?
+  valoresNuevos     Json?
+  usuarioId         String?
+  /// Agrupa todas las filas producidas por una misma corrida de
+  /// importación (accion = IMPORTAR) para poder resolver
+  /// GET /api/importaciones/{id} sin necesitar una tabla de "lotes" aparte.
+  loteId            String?
+  fecha             DateTime        @default(now())
+
+  usuario Usuario? @relation(fields: [usuarioId], references: [id])
+
+  @@index([entidad, entidadId])
+  @@index([fecha])
+  @@index([loteId])
+  @@map("historial_cambios")
+}
