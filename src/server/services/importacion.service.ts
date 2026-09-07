@@ -424,7 +424,11 @@ export async function confirmarImportacion(
         }
       }
     },
-    { timeout: 60_000 },
+    // Cada fila hace varias consultas secuenciales (resolver campus,
+    // edificio, ubicación, área, puesto, persona…) contra Neon; con
+    // archivos grandes el total supera fácilmente el timeout por defecto
+    // de las transacciones interactivas de Prisma (5s) o incluso 60s.
+    { timeout: 300_000, maxWait: 30_000 },
   );
 
   return { loteId, creadas, actualizadas, omitidas };

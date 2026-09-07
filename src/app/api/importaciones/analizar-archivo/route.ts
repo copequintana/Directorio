@@ -4,6 +4,8 @@ import { requireRole } from "@/server/infrastructure/auth-guard";
 import { parseArchivoImportacion } from "@/lib/import-parsing";
 import { analizarImportacion } from "@/server/services/importacion.service";
 
+export const maxDuration = 120;
+
 // Recibe el archivo .xlsx/.csv tal cual lo sube el navegador (multipart/form-
 // data), lo convierte al formato normalizado (spec sección 16) y devuelve la
 // vista previa junto con las filas ya estructuradas — el cliente reenvía
