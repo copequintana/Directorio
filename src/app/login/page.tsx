@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -36,6 +37,14 @@ function LoginForm() {
 
   return (
     <div className="mx-auto flex max-w-sm flex-col gap-6 px-4 py-16">
+      <Image
+        src="/logo.png"
+        alt="Directorio ITSON — Personas que hacen ITSON"
+        width={280}
+        height={280}
+        className="mx-auto h-auto w-48"
+        priority
+      />
       <Card>
         <CardHeader>
           <CardTitle>Iniciar sesión</CardTitle>
