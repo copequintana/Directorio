@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { EstadoBadge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { HistorialPanel } from "@/components/admin/historial-panel";
+import { ReportarErrorForm } from "@/components/directorio/reportar-error-form";
 
 export default async function ExtensionDetailPage({
   params,
@@ -81,6 +82,8 @@ export default async function ExtensionDetailPage({
           )}
         </CardContent>
       </Card>
+
+      <ReportarErrorForm extensionId={extension.id} />
 
       {session?.user && (
         <Card>

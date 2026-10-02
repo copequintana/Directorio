@@ -100,6 +100,21 @@ export interface HistorialCambios {
   usuario?: { id: string; nombre: string; correo: string } | null;
 }
 
+export interface SolicitudCambio {
+  id: string;
+  extensionId: string;
+  nombreSolicitante: string;
+  correoSolicitante: string | null;
+  mensaje: string;
+  estado: "PENDIENTE" | "APLICADA" | "RECHAZADA";
+  notaAdmin: string | null;
+  usuarioResolvioId: string | null;
+  fechaResolucion: string | null;
+  createdAt: string;
+  extension?: { id: string; numero: string };
+  usuarioResolvio?: { id: string; nombre: string } | null;
+}
+
 export interface SearchResultItem {
   extensionId: string;
   numero: string;

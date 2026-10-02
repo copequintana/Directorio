@@ -92,7 +92,18 @@ POST   /api/importaciones                    { filas: ImportRow[] }        → v
 POST   /api/importaciones/analizar-archivo   multipart/form-data: file     → parsea .xlsx/.csv + vista previa
 POST   /api/importaciones/confirmar          { filas: ImportRow[] }        → persiste (transaccional)
 GET    /api/importaciones/{id}               (id = loteId devuelto al confirmar)
+
+POST   /api/extensions/{id}/solicitudes      { nombreSolicitante, correoSolicitante?, mensaje }  (público, sin sesión)
+GET    /api/solicitudes?estado=              (PENDIENTE|APLICADA|RECHAZADA, por defecto todas)
+PUT    /api/solicitudes/{id}                 { estado: APLICADA|RECHAZADA, notaAdmin? }
 ```
+
+`POST /api/extensions/{id}/solicitudes` es el único endpoint de escritura sin
+autenticación a propósito: es el "reportar un error" que cualquiera puede
+usar desde la ficha pública de una extensión (`/extensions/{id}`). No aplica
+ningún cambio por sí solo — solo queda en una bandeja (`/admin/solicitudes`)
+para que un Capturista/Administrador la revise y haga el cambio real con las
+herramientas normales (que sí quedan en `HistorialCambios`).
 
 Los endpoints marcados `DELETE` **nunca borran físicamente** — desactivan
 lógicamente (spec 6.5-6.6), excepto la finalización de una asignación, que

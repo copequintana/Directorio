@@ -134,6 +134,7 @@ export const openApiSpec = {
     { name: "Edificios" },
     { name: "Ubicaciones" },
     { name: "Importación" },
+    { name: "Solicitudes" },
   ],
   paths: {
     "/api/directorio/search": {
@@ -218,6 +219,68 @@ export const openApiSpec = {
         summary: "Consultar el resultado de un lote de importación por loteId",
         security: [{ sessionCookie: [] }],
         responses: { "200": { description: "OK", content: { "application/json": { schema: envelope({}) } } } },
+      },
+    },
+    "/api/extensions/{id}/solicitudes": {
+      parameters: [idParam],
+      post: {
+        tags: ["Solicitudes"],
+        summary: "Reportar un dato incorrecto de una extensión (público, sin sesión)",
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["nombreSolicitante", "mensaje"],
+                properties: {
+                  nombreSolicitante: { type: "string" },
+                  correoSolicitante: { type: "string", format: "email" },
+                  mensaje: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: { "201": { description: "Creada", content: { "application/json": { schema: envelope({}) } } } },
+      },
+    },
+    "/api/solicitudes": {
+      get: {
+        tags: ["Solicitudes"],
+        summary: "Listar solicitudes de corrección",
+        security: [{ sessionCookie: [] }],
+        parameters: [
+          { name: "estado", in: "query", schema: { type: "string", enum: ["PENDIENTE", "APLICADA", "RECHAZADA"] } },
+        ],
+        responses: { "200": { description: "OK", content: { "application/json": { schema: envelope({ type: "array", items: {} }) } } } },
+      },
+    },
+    "/api/solicitudes/{id}": {
+      parameters: [idParam],
+      put: {
+        tags: ["Solicitudes"],
+        summary: "Resolver una solicitud (aplicada/rechazada)",
+        security: [{ sessionCookie: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["estado"],
+                properties: {
+                  estado: { type: "string", enum: ["APLICADA", "RECHAZADA"] },
+                  notaAdmin: { type: "string" },
+                },
+              },
+            },
+          },
+        },
+        responses: {
+          "200": { description: "OK", content: { "application/json": { schema: envelope({}) } } },
+          "409": { description: "Ya estaba resuelta", content: { "application/json": { schema: errorEnvelope } } },
+        },
       },
     },
   },

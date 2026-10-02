@@ -5,15 +5,23 @@ import { prisma } from "@/lib/db/prisma";
  * la API para estos datos, así que no se justifica exponer un endpoint REST
  * aparte. */
 export async function obtenerIndicadoresDashboard() {
-  const [totalExtensiones, extensionesActivas, extensionesSinAsignar, extensionesInactivas, totalPersonas, totalAreas] =
-    await Promise.all([
-      prisma.extension.count({ where: { activo: true } }),
-      prisma.extension.count({ where: { activo: true, estado: "ACTIVA" } }),
-      prisma.extension.count({ where: { activo: true, estado: "SIN_ASIGNAR" } }),
-      prisma.extension.count({ where: { activo: false } }),
-      prisma.persona.count({ where: { activo: true } }),
-      prisma.area.count({ where: { activo: true } }),
-    ]);
+  const [
+    totalExtensiones,
+    extensionesActivas,
+    extensionesSinAsignar,
+    extensionesInactivas,
+    totalPersonas,
+    totalAreas,
+    solicitudesPendientes,
+  ] = await Promise.all([
+    prisma.extension.count({ where: { activo: true } }),
+    prisma.extension.count({ where: { activo: true, estado: "ACTIVA" } }),
+    prisma.extension.count({ where: { activo: true, estado: "SIN_ASIGNAR" } }),
+    prisma.extension.count({ where: { activo: false } }),
+    prisma.persona.count({ where: { activo: true } }),
+    prisma.area.count({ where: { activo: true } }),
+    prisma.solicitudCambio.count({ where: { estado: "PENDIENTE" } }),
+  ]);
 
   return {
     totalExtensiones,
@@ -22,5 +30,6 @@ export async function obtenerIndicadoresDashboard() {
     extensionesInactivas,
     totalPersonas,
     totalAreas,
+    solicitudesPendientes,
   };
 }

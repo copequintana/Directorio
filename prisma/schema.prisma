@@ -167,9 +167,42 @@ model Extension {
   updatedAt     DateTime        @updatedAt
 
   asignaciones AsignacionExtension[]
+  solicitudes  SolicitudCambio[]
 
   @@index([estado])
   @@map("extensiones")
+}
+
+enum EstadoSolicitud {
+  PENDIENTE
+  APLICADA
+  RECHAZADA
+}
+
+/// Vía libre para que cualquiera (sin cuenta) reporte un dato incorrecto de
+/// una extensión; un Capturista/Administrador la revisa y aplica el cambio
+/// con las herramientas normales de edición (que sí quedan en
+/// HistorialCambios) y marca aquí el resultado. No es una cola de cambios
+/// estructurados: el mensaje es texto libre a propósito, porque quien
+/// reporta rara vez sabe "qué campo" está mal, solo qué está mal.
+model SolicitudCambio {
+  id                 String          @id @default(cuid())
+  extensionId        String
+  nombreSolicitante  String
+  correoSolicitante  String?
+  mensaje            String
+  estado             EstadoSolicitud @default(PENDIENTE)
+  notaAdmin          String?
+  usuarioResolvioId  String?
+  fechaResolucion    DateTime?
+  createdAt          DateTime        @default(now())
+
+  extension     Extension @relation(fields: [extensionId], references: [id])
+  usuarioResolvio Usuario? @relation(fields: [usuarioResolvioId], references: [id])
+
+  @@index([extensionId])
+  @@index([estado])
+  @@map("solicitudes_cambio")
 }
 
 /// Tabla central (spec 5.8). TipoAsignacion (spec 24) distingue si la
@@ -232,7 +265,8 @@ model Usuario {
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
 
-  historial HistorialCambios[]
+  historial            HistorialCambios[]
+  solicitudesResueltas SolicitudCambio[]
 
   @@map("usuarios")
 }

@@ -16,12 +16,21 @@ Extension 1───N AsignacionExtension N───1 Persona (opcional)
                                     N───1 Ubicacion (opcional)
 
 Usuario 1───N HistorialCambios
+Extension 1───N SolicitudCambio N───1 Usuario (opcional, quien la resolvió)
 ```
 
 `AsignacionExtension` es la tabla central (spec 5.8): permite que una
 extensión tenga cero, una o varias personas activas al mismo tiempo, y
 conserva el historial de asignaciones vía `fechaInicio`/`fechaFin` en lugar
 de sobrescribir filas.
+
+`SolicitudCambio` no es parte del documento original: es el mecanismo para
+que cualquiera (sin cuenta) reporte un dato incorrecto de una extensión
+desde la ficha pública, y un Capturista/Administrador lo revise en
+`/admin/solicitudes`. Es deliberadamente texto libre (`mensaje`), no un
+diff estructurado — resolverla no aplica el cambio sola, solo la marca
+como `APLICADA`/`RECHAZADA`; el cambio real se hace con las herramientas de
+edición normales, que sí quedan en `HistorialCambios`.
 
 ## Decisiones de modelado que no son literales del documento
 

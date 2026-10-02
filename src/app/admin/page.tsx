@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { obtenerIndicadoresDashboard } from "@/server/services/dashboard.service";
 import { obtenerCambiosRecientes } from "@/server/services/historial.service";
 import { Card, CardContent } from "@/components/ui/card";
@@ -39,6 +40,15 @@ export default async function AdminDashboardPage() {
             </CardContent>
           </Card>
         ))}
+
+        <Link href="/admin/solicitudes">
+          <Card className={indicadores.solicitudesPendientes > 0 ? "border-warning" : undefined}>
+            <CardContent>
+              <p className="text-xs text-muted">Solicitudes pendientes</p>
+              <p className="text-3xl font-bold text-primary">{indicadores.solicitudesPendientes}</p>
+            </CardContent>
+          </Card>
+        </Link>
       </div>
 
       <Card>
