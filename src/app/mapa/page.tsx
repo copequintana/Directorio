@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CampusMap } from "@/components/mapa/campus-map";
 import { campusService } from "@/services/catalogos.service";
@@ -13,6 +13,7 @@ export default function MapaPage() {
   const [resultados, setResultados] = useState<SearchResultItem[] | null>(null);
   const [cargandoResultados, setCargandoResultados] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const resultadosRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     campusService
@@ -33,6 +34,8 @@ export default function MapaPage() {
     setEdificioActivo(edificio);
     setResultados(null);
     setCargandoResultados(true);
+    // El mapa es alto; sin esto no es obvio que algo pasó al tocar un pin.
+    setTimeout(() => resultadosRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
     try {
       const res = await buscarDirectorio({ edificioId: edificio.id, pageSize: 50 });
       setResultados(res.items);
@@ -61,7 +64,7 @@ export default function MapaPage() {
       />
 
       {edificioActivo && (
-        <Card>
+        <Card ref={resultadosRef}>
           <CardContent className="flex flex-col gap-2">
             <h2 className="font-semibold">{edificioActivo.nombre}</h2>
             {cargandoResultados && <p className="text-sm text-muted">Cargando…</p>}
