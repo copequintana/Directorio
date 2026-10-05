@@ -19,9 +19,15 @@ export const TIPO_UBICACION_LABEL: Record<string, string> = {
  */
 const COLLATOR = new Intl.Collator("es", { numeric: true, sensitivity: "base" });
 
+type UbicacionOrdenable = Pick<Ubicacion, "tipo" | "nombre" | "numero"> | null | undefined;
+
 /** Orden natural (Cubículo 1, 2, 3…10, 11) en vez del alfabético por
- * defecto ("1, 10, 11, 12…2, 3"), agrupado por tipo primero. */
-export function compararUbicaciones(a: Ubicacion, b: Ubicacion): number {
+ * defecto ("1, 10, 11, 12…2, 3"), agrupado por tipo primero. Sin ubicación
+ * va al final, no mezclado alfabéticamente con los tipos reales. */
+export function compararUbicaciones(a: UbicacionOrdenable, b: UbicacionOrdenable): number {
+  if (!a && !b) return 0;
+  if (!a) return 1;
+  if (!b) return -1;
   return (
     COLLATOR.compare(a.tipo, b.tipo) ||
     COLLATOR.compare(a.nombre ?? a.numero ?? "", b.nombre ?? b.numero ?? "")

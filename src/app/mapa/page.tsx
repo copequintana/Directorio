@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { CampusMap } from "@/components/mapa/campus-map";
 import { campusService } from "@/services/catalogos.service";
 import { buscarDirectorio } from "@/services/directorio.service";
-import { TIPO_UBICACION_LABEL } from "@/lib/format";
+import { compararUbicaciones, TIPO_UBICACION_LABEL } from "@/lib/format";
 import type { CampusConMapa, Edificio, SearchResultItem } from "@/types/entities";
 
 function formatUbicacionResultado(u: SearchResultItem["ubicacion"]): string {
@@ -89,15 +89,21 @@ export default function MapaPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
-                  {resultados.map((r) => (
-                    <tr key={r.extensionId}>
-                      <td className="py-1.5 pr-2">
-                        {r.personas.map((p) => p.nombreCompleto).join(", ") || r.area?.nombre || "Sin asignar"}
-                      </td>
-                      <td className="py-1.5 pr-2 text-muted">{formatUbicacionResultado(r.ubicacion)}</td>
-                      <td className="py-1.5 text-right font-semibold text-primary">{r.numero}</td>
-                    </tr>
-                  ))}
+                  {[...resultados]
+                    .sort(
+                      (a, b) =>
+                        compararUbicaciones(a.ubicacion, b.ubicacion) ||
+                        a.numero.localeCompare(b.numero, "es", { numeric: true }),
+                    )
+                    .map((r) => (
+                      <tr key={r.extensionId}>
+                        <td className="py-1.5 pr-2">
+                          {r.personas.map((p) => p.nombreCompleto).join(", ") || r.area?.nombre || "Sin asignar"}
+                        </td>
+                        <td className="py-1.5 pr-2 text-muted">{formatUbicacionResultado(r.ubicacion)}</td>
+                        <td className="py-1.5 text-right font-semibold text-primary">{r.numero}</td>
+                      </tr>
+                    ))}
                 </tbody>
               </table>
             )}
