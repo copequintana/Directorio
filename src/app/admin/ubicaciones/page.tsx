@@ -19,6 +19,8 @@ export default function AdminUbicacionesPage() {
   const [mapaUrls, setMapaUrls] = useState<Record<string, string>>({});
   const [nuevoEdificio, setNuevoEdificio] = useState({ nombre: "", campusId: "" });
   const [nuevaUbicacion, setNuevaUbicacion] = useState({ nombre: "", tipo: "OFICINA", edificioId: "" });
+  const [filtroUbicacion, setFiltroUbicacion] = useState("");
+  const [edificioEdit, setEdificioEdit] = useState<Record<string, string>>({});
 
   async function cargarTodo() {
     const [c, e, u] = await Promise.all([
@@ -82,6 +84,17 @@ export default function AdminUbicacionesPage() {
       cargarTodo();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "No se pudo guardar el mapa.");
+    }
+  }
+
+  async function guardarEdificioUbicacion(ubicacionId: string) {
+    const edificioId = edificioEdit[ubicacionId] ?? "";
+    try {
+      await ubicacionesService.actualizar(ubicacionId, { edificioId: edificioId || null });
+      toast.success("Edificio asignado.");
+      cargarTodo();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo asignar el edificio.");
     }
   }
 
@@ -237,18 +250,47 @@ export default function AdminUbicacionesPage() {
               Agregar ubicación
             </Button>
           </form>
+
+          <Input
+            placeholder="Buscar por nombre o tipo…"
+            value={filtroUbicacion}
+            onChange={(e) => setFiltroUbicacion(e.target.value)}
+            className="max-w-xs"
+          />
+
           <ul className="flex flex-col divide-y divide-border text-sm">
-            {ubicaciones.map((u) => (
-              <li key={u.id} className="flex items-center justify-between py-1.5">
-                <span>
-                  {u.tipo} {u.nombre ?? u.numero ?? ""}{" "}
-                  <span className="text-muted">{u.edificio ? `· ${u.edificio.nombre}` : "· sin edificio"}</span>
-                </span>
-                <button onClick={() => desactivar("ubicacion", u.id)} className="text-danger hover:underline">
-                  Desactivar
-                </button>
-              </li>
-            ))}
+            {ubicaciones
+              .filter((u) => {
+                const texto = `${u.tipo} ${u.nombre ?? ""} ${u.numero ?? ""}`.toLowerCase();
+                return texto.includes(filtroUbicacion.toLowerCase());
+              })
+              .map((u) => (
+                <li key={u.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5">
+                  <span>
+                    {u.tipo} {u.nombre ?? u.numero ?? ""}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Select
+                      value={edificioEdit[u.id] ?? u.edificioId ?? ""}
+                      onChange={(e) => setEdificioEdit((m) => ({ ...m, [u.id]: e.target.value }))}
+                      className="h-8 w-56 text-xs"
+                    >
+                      <option value="">Sin edificio identificado</option>
+                      {edificios.map((e) => (
+                        <option key={e.id} value={e.id}>
+                          {e.nombre} ({e.campus?.nombre})
+                        </option>
+                      ))}
+                    </Select>
+                    <Button size="sm" variant="outline" onClick={() => guardarEdificioUbicacion(u.id)}>
+                      Guardar
+                    </Button>
+                    <button onClick={() => desactivar("ubicacion", u.id)} className="text-danger hover:underline">
+                      Desactivar
+                    </button>
+                  </div>
+                </li>
+              ))}
           </ul>
         </CardContent>
       </Card>
