@@ -31,6 +31,8 @@ export const extensionesService = {
   historial: (id: string) => api.get<HistorialCambios[]>(`/api/extensions/${id}/historial`),
   asignar: (extensionId: string, data: Partial<AsignacionExtension>) =>
     api.post<AsignacionExtension>(`/api/extensions/${extensionId}/asignaciones`, data),
+  editarAsignacion: (extensionId: string, asignacionId: string, data: Partial<AsignacionExtension>) =>
+    api.put<AsignacionExtension>(`/api/extensions/${extensionId}/asignaciones/${asignacionId}`, data),
   desasignar: (extensionId: string, asignacionId: string) =>
     api.delete<AsignacionExtension>(`/api/extensions/${extensionId}/asignaciones/${asignacionId}`),
 };

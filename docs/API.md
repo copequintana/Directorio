@@ -49,6 +49,7 @@ PUT    /api/extensions/{id}
 DELETE /api/extensions/{id}                  (baja lógica)
 GET    /api/extensions/{id}/historial
 POST   /api/extensions/{id}/asignaciones     { personaId?, areaId?, ubicacionId?, tipoAsignacion?, esPrincipal? }
+PUT    /api/extensions/{id}/asignaciones/{asignacionId}   corrige la asignación existente (no cambia fechaInicio)
 DELETE /api/extensions/{id}/asignaciones/{asignacionId}   (finaliza, no borra)
 
 GET    /api/personas?q=&areaId=&page=&pageSize=&incluirInactivos=

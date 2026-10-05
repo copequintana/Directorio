@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { prismaMock } from "@/test/prisma-mock";
-import { crearAsignacion, eliminarAsignacion } from "@/server/services/asignacion.service";
+import { actualizarAsignacion, crearAsignacion, eliminarAsignacion } from "@/server/services/asignacion.service";
 import { ServiceError } from "@/server/infrastructure/errors";
 
 const USUARIO_ID = "usuario-1";
@@ -88,6 +88,52 @@ describe("crearAsignacion", () => {
     prismaMock.extension.findUnique.mockResolvedValue(null);
     await expect(
       crearAsignacion("no-existe", { esPrincipal: true, tipoAsignacion: "INDIVIDUAL" }, USUARIO_ID),
+    ).rejects.toThrow(ServiceError);
+  });
+});
+
+describe("actualizarAsignacion", () => {
+  const asignacionExistente = {
+    id: "asig-1",
+    extensionId: "ext-1",
+    personaId: "persona-1",
+    areaId: "area-vieja",
+    ubicacionId: null,
+    tipoAsignacion: "INDIVIDUAL" as const,
+    fechaInicio: new Date(),
+    fechaFin: null,
+    esPrincipal: true,
+    activo: true,
+    observaciones: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  it("corrige el área sin tocar fechaInicio ni crear una nueva asignación", async () => {
+    prismaMock.asignacionExtension.findUnique.mockResolvedValue(asignacionExistente);
+    prismaMock.asignacionExtension.update.mockResolvedValue({
+      ...asignacionExistente,
+      areaId: "area-nueva",
+    });
+
+    const actualizada = await actualizarAsignacion(
+      "ext-1",
+      "asig-1",
+      { areaId: "area-nueva" },
+      USUARIO_ID,
+    );
+
+    expect(actualizada.areaId).toBe("area-nueva");
+    expect(prismaMock.asignacionExtension.create).not.toHaveBeenCalled();
+    expect(prismaMock.historialCambios.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ accion: "ACTUALIZAR" }) }),
+    );
+  });
+
+  it("rechaza editar una asignación de otra extensión", async () => {
+    prismaMock.asignacionExtension.findUnique.mockResolvedValue(asignacionExistente);
+    await expect(
+      actualizarAsignacion("otra-extension", "asig-1", { areaId: "x" }, USUARIO_ID),
     ).rejects.toThrow(ServiceError);
   });
 });

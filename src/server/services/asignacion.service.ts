@@ -53,6 +53,52 @@ export async function crearAsignacion(
   });
 }
 
+/**
+ * Edita una asignación existente (p. ej. corregir el área/ubicación sin
+ * tener que quitarla y volver a crearla, lo que perdería fechaInicio y
+ * generaría un ASIGNAR/DESASIGNAR espurio en el historial).
+ */
+export async function actualizarAsignacion(
+  extensionId: string,
+  asignacionId: string,
+  input: Partial<AsignacionInput>,
+  usuarioId: string,
+) {
+  return prisma.$transaction(async (tx: Prisma.TransactionClient) => {
+    const anterior = await tx.asignacionExtension.findUnique({ where: { id: asignacionId } });
+    if (!anterior || anterior.extensionId !== extensionId) {
+      throw new ServiceError(404, "Asignación no encontrada.");
+    }
+
+    if (input.personaId) {
+      const persona = await tx.persona.findUnique({ where: { id: input.personaId } });
+      if (!persona) throw new ServiceError(400, "La persona indicada no existe.");
+    }
+
+    if (input.esPrincipal) {
+      await tx.asignacionExtension.updateMany({
+        where: { extensionId, activo: true, esPrincipal: true, id: { not: asignacionId } },
+        data: { esPrincipal: false },
+      });
+    }
+
+    const actualizada = await tx.asignacionExtension.update({
+      where: { id: asignacionId },
+      data: input,
+    });
+
+    await registrarHistorial(tx, {
+      entidad: "AsignacionExtension",
+      entidadId: asignacionId,
+      accion: "ACTUALIZAR",
+      valoresAnteriores: anterior,
+      valoresNuevos: actualizada,
+      usuarioId,
+    });
+    return actualizada;
+  });
+}
+
 /** Termina una asignación sin borrarla (fechaFin), preservando el historial. */
 export async function eliminarAsignacion(
   extensionId: string,

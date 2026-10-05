@@ -16,6 +16,7 @@ export default function EditarExtensionPage({ params }: { params: Promise<{ id: 
   const [extension, setExtension] = useState<Extension | null>(null);
   const [form, setForm] = useState({ numero: "", estado: "SIN_ASIGNAR", observaciones: "" });
   const [guardando, setGuardando] = useState(false);
+  const [editandoAsignacionId, setEditandoAsignacionId] = useState<string | null>(null);
 
   async function cargar() {
     const ext = await extensionesService.obtener(id);
@@ -114,25 +115,47 @@ export default function EditarExtensionPage({ params }: { params: Promise<{ id: 
             <p className="text-sm text-muted">Sin asignaciones activas.</p>
           ) : (
             <ul className="flex flex-col divide-y divide-border">
-              {extension.asignaciones.map((a) => (
-                <li key={a.id} className="flex items-center justify-between py-2 text-sm">
-                  <span>
-                    {a.persona?.nombreCompleto ?? "(sin persona)"}
-                    {a.area ? ` · ${a.area.nombre}` : ""}
-                    {a.ubicacion ? ` · ${a.ubicacion.nombre ?? a.ubicacion.numero ?? a.ubicacion.tipo}` : ""}
-                    {a.tipoAsignacion === "COMPARTIDA" && " · Compartida"}
-                  </span>
-                  <button onClick={() => quitarAsignacion(a.id)} className="text-danger hover:underline">
-                    Quitar
-                  </button>
-                </li>
-              ))}
+              {extension.asignaciones.map((a) =>
+                editandoAsignacionId === a.id ? (
+                  <li key={a.id} className="py-2">
+                    <AsignacionForm
+                      extensionId={id}
+                      asignacion={a}
+                      onGuardada={() => {
+                        setEditandoAsignacionId(null);
+                        cargar();
+                      }}
+                      onCancelar={() => setEditandoAsignacionId(null)}
+                    />
+                  </li>
+                ) : (
+                  <li key={a.id} className="flex items-center justify-between py-2 text-sm">
+                    <span>
+                      {a.persona?.nombreCompleto ?? "(sin persona)"}
+                      {a.area ? ` · ${a.area.nombre}` : ""}
+                      {a.ubicacion ? ` · ${a.ubicacion.nombre ?? a.ubicacion.numero ?? a.ubicacion.tipo}` : ""}
+                      {a.tipoAsignacion === "COMPARTIDA" && " · Compartida"}
+                    </span>
+                    <span className="flex gap-3">
+                      <button
+                        onClick={() => setEditandoAsignacionId(a.id)}
+                        className="text-accent hover:underline"
+                      >
+                        Editar
+                      </button>
+                      <button onClick={() => quitarAsignacion(a.id)} className="text-danger hover:underline">
+                        Quitar
+                      </button>
+                    </span>
+                  </li>
+                ),
+              )}
             </ul>
           )}
 
           <div className="border-t border-border pt-3">
             <p className="mb-2 text-sm font-medium">Agregar asignación</p>
-            <AsignacionForm extensionId={id} onCreada={cargar} />
+            <AsignacionForm extensionId={id} onGuardada={cargar} />
           </div>
         </CardContent>
       </Card>

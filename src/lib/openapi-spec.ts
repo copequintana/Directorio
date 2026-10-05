@@ -172,6 +172,13 @@ export const openApiSpec = {
     },
     "/api/extensions/{id}/asignaciones/{asignacionId}": {
       parameters: [idParam, { name: "asignacionId", in: "path" as const, required: true, schema: { type: "string" } }],
+      put: {
+        tags: ["Asignaciones"],
+        summary: "Corregir una asignación existente (no cambia fechaInicio ni genera ASIGNAR/DESASIGNAR)",
+        security: [{ sessionCookie: [] }],
+        requestBody: { required: true, content: { "application/json": { schema: {} } } },
+        responses: { "200": { description: "OK", content: { "application/json": { schema: envelope({}) } } } },
+      },
       delete: {
         tags: ["Asignaciones"],
         summary: "Finalizar una asignación (fechaFin) sin borrar el historial",
