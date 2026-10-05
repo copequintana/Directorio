@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Select } from "@/components/ui/input";
 import { areasService, campusService, edificiosService, ubicacionesService } from "@/services/catalogos.service";
+import { compararUbicaciones, formatUbicacion } from "@/lib/format";
 import type { Area, Campus, Edificio, Ubicacion } from "@/types/entities";
 
 export interface FiltrosValor {
@@ -88,9 +89,9 @@ export function FiltrosBusqueda({
 
       <Select value={valor.ubicacionId} onChange={(e) => set("ubicacionId", e.target.value)}>
         <option value="">Todas las ubicaciones</option>
-        {ubicaciones.map((u) => (
+        {[...ubicaciones].sort(compararUbicaciones).map((u) => (
           <option key={u.id} value={u.id}>
-            {u.nombre ?? u.numero ?? u.tipo}
+            {formatUbicacion(u)}
           </option>
         ))}
       </Select>

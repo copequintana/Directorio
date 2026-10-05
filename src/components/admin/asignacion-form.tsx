@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { extensionesService } from "@/services/extensiones.service";
 import { areasService, ubicacionesService } from "@/services/catalogos.service";
 import { personasService } from "@/services/personas.service";
+import { compararUbicaciones, formatUbicacion } from "@/lib/format";
 import type { Area, Persona, Ubicacion } from "@/types/entities";
 
 export function AsignacionForm({
@@ -73,9 +74,9 @@ export function AsignacionForm({
       </Select>
       <Select value={ubicacionId} onChange={(e) => setUbicacionId(e.target.value)} className="w-48">
         <option value="">Sin ubicación</option>
-        {ubicaciones.map((u) => (
+        {[...ubicaciones].sort(compararUbicaciones).map((u) => (
           <option key={u.id} value={u.id}>
-            {u.nombre ?? u.numero ?? u.tipo}
+            {formatUbicacion(u)}
           </option>
         ))}
       </Select>

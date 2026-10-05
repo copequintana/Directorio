@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import { campusService, edificiosService, ubicacionesService } from "@/services/catalogos.service";
+import { compararUbicaciones, TIPO_UBICACION_LABEL } from "@/lib/format";
 import type { Campus, Edificio, Ubicacion } from "@/types/entities";
 
 const TIPOS = ["OFICINA", "CUBICULO", "AULA", "VENTANILLA", "LABORATORIO", "SITE", "AREA", "OTRO"];
@@ -224,7 +225,7 @@ export default function AdminUbicacionesPage() {
             >
               {TIPOS.map((t) => (
                 <option key={t} value={t}>
-                  {t}
+                  {TIPO_UBICACION_LABEL[t] ?? t}
                 </option>
               ))}
             </Select>
@@ -264,10 +265,11 @@ export default function AdminUbicacionesPage() {
                 const texto = `${u.tipo} ${u.nombre ?? ""} ${u.numero ?? ""}`.toLowerCase();
                 return texto.includes(filtroUbicacion.toLowerCase());
               })
+              .sort(compararUbicaciones)
               .map((u) => (
                 <li key={u.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5">
                   <span>
-                    {u.tipo} {u.nombre ?? u.numero ?? ""}
+                    {TIPO_UBICACION_LABEL[u.tipo] ?? u.tipo} {u.nombre ?? u.numero ?? ""}
                   </span>
                   <div className="flex items-center gap-2">
                     <Select
