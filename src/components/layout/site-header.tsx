@@ -23,6 +23,9 @@ export function SiteHeader() {
           <Link href="/" className="text-foreground hover:text-accent">
             Buscar
           </Link>
+          <Link href="/mapa" className="text-foreground hover:text-accent">
+            Mapa
+          </Link>
           {status === "authenticated" ? (
             <>
               <Link href="/admin" className="text-foreground hover:text-accent">

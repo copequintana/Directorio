@@ -16,6 +16,7 @@ export default function AdminUbicacionesPage() {
   const [ubicaciones, setUbicaciones] = useState<Ubicacion[]>([]);
 
   const [nuevoCampus, setNuevoCampus] = useState({ nombre: "", clave: "" });
+  const [mapaUrls, setMapaUrls] = useState<Record<string, string>>({});
   const [nuevoEdificio, setNuevoEdificio] = useState({ nombre: "", campusId: "" });
   const [nuevaUbicacion, setNuevaUbicacion] = useState({ nombre: "", tipo: "OFICINA", edificioId: "" });
 
@@ -74,6 +75,16 @@ export default function AdminUbicacionesPage() {
     }
   }
 
+  async function guardarMapaUrl(id: string) {
+    try {
+      await campusService.actualizar(id, { mapaUrl: mapaUrls[id] || null });
+      toast.success("Mapa actualizado.");
+      cargarTodo();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "No se pudo guardar el mapa.");
+    }
+  }
+
   async function desactivar(tipo: "campus" | "edificio" | "ubicacion", id: string) {
     if (!confirm("¿Desactivar este registro?")) return;
     const servicio = { campus: campusService, edificio: edificiosService, ubicacion: ubicacionesService }[tipo];
@@ -116,13 +127,26 @@ export default function AdminUbicacionesPage() {
           </form>
           <ul className="flex flex-col divide-y divide-border text-sm">
             {campus.map((c) => (
-              <li key={c.id} className="flex items-center justify-between py-1.5">
-                <span>
-                  {c.nombre} <span className="text-muted">({c.clave})</span>
-                </span>
-                <button onClick={() => desactivar("campus", c.id)} className="text-danger hover:underline">
-                  Desactivar
-                </button>
+              <li key={c.id} className="flex flex-col gap-2 py-2">
+                <div className="flex items-center justify-between">
+                  <span>
+                    {c.nombre} <span className="text-muted">({c.clave})</span>
+                  </span>
+                  <button onClick={() => desactivar("campus", c.id)} className="text-danger hover:underline">
+                    Desactivar
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Input
+                    placeholder="/campus-maps/archivo.jpg"
+                    value={mapaUrls[c.id] ?? c.mapaUrl ?? ""}
+                    onChange={(e) => setMapaUrls((m) => ({ ...m, [c.id]: e.target.value }))}
+                    className="h-8 flex-1 text-xs"
+                  />
+                  <Button size="sm" variant="outline" onClick={() => guardarMapaUrl(c.id)}>
+                    Guardar mapa
+                  </Button>
+                </div>
               </li>
             ))}
           </ul>

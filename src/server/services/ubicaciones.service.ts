@@ -137,6 +137,23 @@ export async function desactivarEdificio(id: string, usuarioId: string) {
   });
 }
 
+/** Campus + sus edificios, para la vista de mapa (pública y de admin). */
+export function obtenerMapaCampus(campusId: string) {
+  return prisma.campus.findUnique({
+    where: { id: campusId },
+    include: { edificios: { where: { activo: true }, orderBy: { nombre: "asc" } } },
+  });
+}
+
+/** Reposiciona el pin de un edificio en el mapa del campus. No pasa por
+ * historial: es un ajuste visual, no un cambio de los datos del edificio. */
+export async function posicionarEdificio(id: string, mapaX: number, mapaY: number) {
+  const edificio = await prisma.edificio.findUnique({ where: { id } });
+  if (!edificio) throw new ServiceError(404, "Edificio no encontrado.");
+
+  return prisma.edificio.update({ where: { id }, data: { mapaX, mapaY } });
+}
+
 // --- Ubicación ------------------------------------------------------------
 
 export function listarUbicaciones(

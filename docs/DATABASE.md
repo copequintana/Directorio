@@ -57,6 +57,13 @@ edición normales, que sí quedan en `HistorialCambios`.
 - **IDs `cuid()`**, timestamps `createdAt`/`updatedAt`, y `activo Boolean`
   para baja lógica en todas las entidades (spec 6.5-6.6: nunca se borra
   físicamente una extensión con historial).
+- **`Campus.mapaUrl` / `Edificio.mapaX` / `Edificio.mapaY`** — tampoco son
+  parte del documento original: soportan el mapa interactivo del campus
+  (`/mapa` público, `/admin/mapa` para posicionar). `mapaUrl` apunta a un
+  asset estático en `public/campus-maps/` (el mapa se versiona con el
+  repo, igual que el logo, no se sube dinámicamente). `mapaX`/`mapaY` son
+  porcentaje (0-100) sobre esa imagen, no píxeles, para no desalinearse si
+  se reescala.
 
 ## Reglas de negocio y dónde se aplican
 

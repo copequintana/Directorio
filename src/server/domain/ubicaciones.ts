@@ -5,6 +5,7 @@ import { z } from "zod";
 export const campusInputSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido"),
   clave: z.string().min(1, "La clave es requerida"),
+  mapaUrl: z.string().optional().nullable(),
   activo: z.boolean().default(true),
 });
 export type CampusInput = z.infer<typeof campusInputSchema>;
@@ -16,9 +17,18 @@ export const edificioInputSchema = z.object({
   nombre: z.string().min(1, "El nombre es requerido"),
   clave: z.string().optional().nullable(),
   descripcion: z.string().optional().nullable(),
+  mapaX: z.number().min(0).max(100).optional().nullable(),
+  mapaY: z.number().min(0).max(100).optional().nullable(),
   activo: z.boolean().default(true),
 });
 export type EdificioInput = z.infer<typeof edificioInputSchema>;
+
+/** Solo para posicionar el pin — evita tener que reenviar nombre/clave/etc. */
+export const posicionEdificioSchema = z.object({
+  mapaX: z.number().min(0).max(100),
+  mapaY: z.number().min(0).max(100),
+});
+export type PosicionEdificioInput = z.infer<typeof posicionEdificioSchema>;
 
 // --- Ubicación ------------------------------------------------------------
 

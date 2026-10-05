@@ -1,5 +1,5 @@
 import { api } from "@/lib/api-client";
-import type { Area, Campus, Edificio, Puesto, Ubicacion } from "@/types/entities";
+import type { Area, Campus, CampusConMapa, Edificio, Puesto, Ubicacion } from "@/types/entities";
 
 export const campusService = {
   listar: (incluirInactivos = false) =>
@@ -7,6 +7,7 @@ export const campusService = {
   crear: (data: Partial<Campus>) => api.post<Campus>("/api/campus", data),
   actualizar: (id: string, data: Partial<Campus>) => api.put<Campus>(`/api/campus/${id}`, data),
   desactivar: (id: string) => api.delete<Campus>(`/api/campus/${id}`),
+  obtenerMapa: (id: string) => api.get<CampusConMapa>(`/api/campus/${id}/mapa`),
 };
 
 export const edificiosService = {
@@ -20,6 +21,8 @@ export const edificiosService = {
   actualizar: (id: string, data: Partial<Edificio>) =>
     api.put<Edificio>(`/api/edificios/${id}`, data),
   desactivar: (id: string) => api.delete<Edificio>(`/api/edificios/${id}`),
+  posicionar: (id: string, mapaX: number, mapaY: number) =>
+    api.put<Edificio>(`/api/edificios/${id}/posicion`, { mapaX, mapaY }),
 };
 
 export const ubicacionesService = {

@@ -71,16 +71,18 @@ PUT    /api/puestos/{id}
 DELETE /api/puestos/{id}
 
 GET    /api/campus?incluirInactivos=
-POST   /api/campus                           { nombre, clave }
+POST   /api/campus                           { nombre, clave, mapaUrl? }
 PUT    /api/campus/{id}
 DELETE /api/campus/{id}
 GET    /api/campus/{id}/historial
+GET    /api/campus/{id}/mapa                 campus + sus edificios con mapaX/mapaY (público)
 
 GET    /api/edificios?campusId=&incluirInactivos=
 POST   /api/edificios                        { campusId, nombre, clave?, descripcion? }
 PUT    /api/edificios/{id}
 DELETE /api/edificios/{id}
 GET    /api/edificios/{id}/historial
+PUT    /api/edificios/{id}/posicion          { mapaX, mapaY } (0-100, % sobre Campus.mapaUrl)
 
 GET    /api/ubicaciones?edificioId=&tipo=&incluirInactivos=
 POST   /api/ubicaciones                      { edificioId?, tipo, nombre?, numero?, piso?, descripcion? }

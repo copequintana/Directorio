@@ -8,6 +8,7 @@ const NAV = [
   { href: "/admin/personas", label: "Personas" },
   { href: "/admin/areas", label: "Áreas" },
   { href: "/admin/ubicaciones", label: "Ubicaciones" },
+  { href: "/admin/mapa", label: "Mapa" },
   { href: "/admin/importar", label: "Importar" },
   { href: "/admin/solicitudes", label: "Solicitudes" },
   { href: "/docs", label: "API (Swagger)" },

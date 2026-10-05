@@ -6,6 +6,7 @@ export interface Campus {
   id: string;
   nombre: string;
   clave: string;
+  mapaUrl: string | null;
   activo: boolean;
 }
 
@@ -15,8 +16,14 @@ export interface Edificio {
   nombre: string;
   clave: string | null;
   descripcion: string | null;
+  mapaX: number | null;
+  mapaY: number | null;
   activo: boolean;
   campus?: Campus;
+}
+
+export interface CampusConMapa extends Campus {
+  edificios: Edificio[];
 }
 
 export interface Ubicacion {

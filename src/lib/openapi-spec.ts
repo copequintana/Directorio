@@ -183,7 +183,39 @@ export const openApiSpec = {
     ...crudPaths("areas", "Áreas"),
     ...crudPaths("puestos", "Puestos"),
     ...crudPaths("campus", "Campus", { noDelete: false }),
+    "/api/campus/{id}/mapa": {
+      parameters: [idParam],
+      get: {
+        tags: ["Campus"],
+        summary: "Campus + sus edificios con posición en el mapa (público)",
+        responses: { "200": { description: "OK", content: { "application/json": { schema: envelope({}) } } } },
+      },
+    },
     ...crudPaths("edificios", "Edificios"),
+    "/api/edificios/{id}/posicion": {
+      parameters: [idParam],
+      put: {
+        tags: ["Edificios"],
+        summary: "Posicionar el pin del edificio sobre el mapa del campus",
+        security: [{ sessionCookie: [] }],
+        requestBody: {
+          required: true,
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                required: ["mapaX", "mapaY"],
+                properties: {
+                  mapaX: { type: "number", minimum: 0, maximum: 100 },
+                  mapaY: { type: "number", minimum: 0, maximum: 100 },
+                },
+              },
+            },
+          },
+        },
+        responses: { "200": { description: "OK", content: { "application/json": { schema: envelope({}) } } } },
+      },
+    },
     ...crudPaths("ubicaciones", "Ubicaciones"),
     "/api/importaciones": {
       post: {

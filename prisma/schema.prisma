@@ -18,6 +18,11 @@ model Campus {
   id        String   @id @default(cuid())
   nombre    String
   clave     String   @unique
+  /// Ruta pública (p. ej. /campus-maps/navojoa-sur.jpg) de la imagen del
+  /// plano del campus. Es un asset estático versionado con el repo, no un
+  /// upload dinámico — agregar/cambiar el mapa es subir el archivo y
+  /// actualizar este campo, como con el logo (ver docs/DATABASE.md).
+  mapaUrl   String?
   activo    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -33,6 +38,11 @@ model Edificio {
   nombre      String
   clave       String?
   descripcion String?
+  /// Posición del pin sobre Campus.mapaUrl, en porcentaje (0-100) del ancho
+  /// y alto de la imagen — así el pin no se desalinea si la imagen se
+  /// reescala. Nulo mientras nadie lo haya posicionado en /admin/mapa.
+  mapaX       Float?
+  mapaY       Float?
   activo      Boolean  @default(true)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
