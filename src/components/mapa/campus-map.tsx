@@ -2,6 +2,7 @@
 
 import { useRef } from "react";
 import Image from "next/image";
+import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Edificio } from "@/types/entities";
 
@@ -47,23 +48,44 @@ export function CampusMap({
 
         {edificios
           .filter((e) => e.mapaX !== null && e.mapaY !== null)
-          .map((e) => (
-            <button
-              key={e.id}
-              type="button"
-              title={e.nombre}
-              onClick={(ev) => {
-                ev.stopPropagation();
-                onPinClick?.(e);
-              }}
-              style={{ left: `${e.mapaX}%`, top: `${e.mapaY}%` }}
-              className={cn(
-                "absolute flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-2 border-white shadow-md transition-transform hover:scale-110",
-                "h-5 w-5 bg-accent",
-                seleccionadoId === e.id && "ring-4 ring-warning",
-              )}
-            />
-          ))}
+          .map((e) => {
+            const seleccionado = seleccionadoId === e.id;
+            return (
+              // -translate-y-full ancla la PUNTA del pin (no el centro) al
+              // punto exacto, como en Google Maps.
+              <div
+                key={e.id}
+                style={{ left: `${e.mapaX}%`, top: `${e.mapaY}%` }}
+                className={cn(
+                  "absolute flex -translate-x-1/2 -translate-y-full flex-col items-center",
+                  seleccionado && "z-10",
+                )}
+              >
+                {seleccionado && (
+                  <span className="mb-1 whitespace-nowrap rounded-full bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground shadow-lg">
+                    {e.nombre}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  title={e.nombre}
+                  onClick={(ev) => {
+                    ev.stopPropagation();
+                    onPinClick?.(e);
+                  }}
+                  className="transition-transform hover:scale-110"
+                >
+                  <MapPin
+                    className={cn(
+                      "text-white drop-shadow-lg",
+                      seleccionado ? "h-11 w-11 animate-bounce fill-danger" : "h-7 w-7 fill-accent",
+                    )}
+                    strokeWidth={1.5}
+                  />
+                </button>
+              </div>
+            );
+          })}
       </div>
     </div>
   );
