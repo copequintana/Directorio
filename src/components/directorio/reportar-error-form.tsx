@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Flag } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input, Textarea } from "@/components/ui/input";
@@ -38,12 +39,10 @@ export function ReportarErrorForm({ extensionId }: { extensionId: string }) {
 
   if (!abierto) {
     return (
-      <button
-        onClick={() => setAbierto(true)}
-        className="text-sm text-accent hover:underline"
-      >
+      <Button variant="outline" size="sm" className="self-start" onClick={() => setAbierto(true)}>
+        <Flag className="h-4 w-4" />
         ¿Ves un dato incorrecto? Repórtalo
-      </button>
+      </Button>
     );
   }
 

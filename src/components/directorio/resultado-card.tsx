@@ -1,6 +1,8 @@
 import Link from "next/link";
+import { MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { EstadoBadge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import type { SearchResultItem } from "@/types/entities";
 
 export function ResultadoCard({ resultado }: { resultado: SearchResultItem }) {
@@ -40,11 +42,11 @@ export function ResultadoCard({ resultado }: { resultado: SearchResultItem }) {
         </Link>
 
         {resultado.edificio && (
-          <Link
-            href={`/mapa?edificioId=${resultado.edificio.id}`}
-            className="text-sm text-accent hover:underline"
-          >
-            Ver en el mapa →
+          <Link href={`/mapa?edificioId=${resultado.edificio.id}`} className="self-start">
+            <Button variant="outline" size="sm">
+              <MapPin className="h-4 w-4" />
+              Ver en el mapa
+            </Button>
           </Link>
         )}
       </CardContent>

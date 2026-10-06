@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, MapPin } from "lucide-react";
 import { auth } from "@/auth";
 import { obtenerExtension } from "@/server/services/extension.service";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,8 +24,11 @@ export default async function ExtensionDetailPage({
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-8">
-      <Link href="/" className="text-sm text-accent hover:underline">
-        ← Volver a la búsqueda
+      <Link href="/" className="self-start">
+        <Button variant="outline" size="sm">
+          <ArrowLeft className="h-4 w-4" />
+          Volver a la búsqueda
+        </Button>
       </Link>
 
       <Card>
@@ -70,11 +74,11 @@ export default async function ExtensionDetailPage({
                     {principal.ubicacion.edificio?.campus ? ` · ${principal.ubicacion.edificio.campus.nombre}` : ""}
                   </p>
                   {principal.ubicacion.edificio && (
-                    <Link
-                      href={`/mapa?edificioId=${principal.ubicacion.edificio.id}`}
-                      className="text-sm text-accent hover:underline"
-                    >
-                      Ver en el mapa →
+                    <Link href={`/mapa?edificioId=${principal.ubicacion.edificio.id}`} className="mt-1 inline-block">
+                      <Button variant="outline" size="sm">
+                        <MapPin className="h-4 w-4" />
+                        Ver en el mapa
+                      </Button>
                     </Link>
                   )}
                 </div>
