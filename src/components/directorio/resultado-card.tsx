@@ -7,9 +7,9 @@ export function ResultadoCard({ resultado }: { resultado: SearchResultItem }) {
   const titulo = resultado.area?.nombre ?? resultado.personas[0]?.nombreCompleto ?? "Extensión";
 
   return (
-    <Link href={`/extensions/${resultado.extensionId}`}>
-      <Card className="transition-shadow hover:shadow-md">
-        <CardContent className="flex flex-col gap-2">
+    <Card className="transition-shadow hover:shadow-md">
+      <CardContent className="flex flex-col gap-2">
+        <Link href={`/extensions/${resultado.extensionId}`} className="flex flex-col gap-2">
           <div className="flex items-start justify-between gap-3">
             <h3 className="font-semibold text-foreground">{titulo}</h3>
             <EstadoBadge estado={resultado.estado} />
@@ -37,8 +37,17 @@ export function ResultadoCard({ resultado }: { resultado: SearchResultItem }) {
           <div className="mt-1 text-2xl font-bold tracking-tight text-primary">
             {resultado.numero}
           </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </Link>
+
+        {resultado.edificio && (
+          <Link
+            href={`/mapa?edificioId=${resultado.edificio.id}`}
+            className="text-sm text-accent hover:underline"
+          >
+            Ver en el mapa →
+          </Link>
+        )}
+      </CardContent>
+    </Card>
   );
 }

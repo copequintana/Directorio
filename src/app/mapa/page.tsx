@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { CampusMap } from "@/components/mapa/campus-map";
 import { campusService } from "@/services/catalogos.service";
@@ -15,7 +16,10 @@ function formatUbicacionResultado(u: SearchResultItem["ubicacion"]): string {
   return detalle ? `${tipoLabel} ${detalle}` : tipoLabel;
 }
 
-export default function MapaPage() {
+function MapaContent() {
+  const searchParams = useSearchParams();
+  const edificioIdParam = searchParams.get("edificioId");
+
   const [campus, setCampus] = useState<CampusConMapa | null>(null);
   const [edificioActivo, setEdificioActivo] = useState<Edificio | null>(null);
   const [resultados, setResultados] = useState<SearchResultItem[] | null>(null);
@@ -38,7 +42,13 @@ export default function MapaPage() {
       .catch((err) => setError(err instanceof Error ? err.message : "No se pudo cargar el mapa."));
   }, []);
 
-  async function onPinClick(edificio: Edificio) {
+  useEffect(() => {
+    if (!campus || !edificioIdParam) return;
+    const edificio = campus.edificios.find((e) => e.id === edificioIdParam);
+    if (edificio) seleccionarEdificio(edificio);
+  }, [campus, edificioIdParam]);
+
+  async function seleccionarEdificio(edificio: Edificio) {
     setEdificioActivo(edificio);
     setResultados(null);
     setCargandoResultados(true);
@@ -68,13 +78,18 @@ export default function MapaPage() {
         mapaUrl={campus.mapaUrl!}
         edificios={campus.edificios}
         seleccionadoId={edificioActivo?.id}
-        onPinClick={onPinClick}
+        onPinClick={seleccionarEdificio}
       />
 
       {edificioActivo && (
         <Card ref={resultadosRef}>
           <CardContent className="flex flex-col gap-2">
             <h2 className="font-semibold">{edificioActivo.nombre}</h2>
+            {edificioActivo.mapaX === null && (
+              <p className="text-sm text-muted">
+                Este edificio todavía no tiene un pin en el mapa (admin → Mapa).
+              </p>
+            )}
             {cargandoResultados && <p className="text-sm text-muted">Cargando…</p>}
             {resultados && resultados.length === 0 && (
               <p className="text-sm text-muted">No hay extensiones registradas en este edificio todavía.</p>
@@ -111,5 +126,13 @@ export default function MapaPage() {
         </Card>
       )}
     </div>
+  );
+}
+
+export default function MapaPage() {
+  return (
+    <Suspense>
+      <MapaContent />
+    </Suspense>
   );
 }

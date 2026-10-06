@@ -69,6 +69,14 @@ export default async function ExtensionDetailPage({
                     {principal.ubicacion.edificio ? ` · ${principal.ubicacion.edificio.nombre}` : ""}
                     {principal.ubicacion.edificio?.campus ? ` · ${principal.ubicacion.edificio.campus.nombre}` : ""}
                   </p>
+                  {principal.ubicacion.edificio && (
+                    <Link
+                      href={`/mapa?edificioId=${principal.ubicacion.edificio.id}`}
+                      className="text-sm text-accent hover:underline"
+                    >
+                      Ver en el mapa →
+                    </Link>
+                  )}
                 </div>
               )}
             </div>
