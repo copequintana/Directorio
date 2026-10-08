@@ -10,6 +10,7 @@ import { EstadoBadge } from "@/components/ui/badge";
 import { extensionesService } from "@/services/extensiones.service";
 import type { Extension } from "@/types/entities";
 import { NuevaExtensionForm } from "@/components/admin/nueva-extension-form";
+import { CompletarUbicacionBanner } from "@/components/admin/completar-ubicacion-banner";
 
 const PAGE_SIZE = 20;
 
@@ -90,6 +91,8 @@ export default function AdminExtensionsPage() {
           }}
         />
       )}
+
+      <CompletarUbicacionBanner onCompletado={cargar} />
 
       <div className="flex flex-wrap gap-2">
         <Input

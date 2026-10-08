@@ -311,3 +311,23 @@ model HistorialCambios {
   @@index([loteId])
   @@map("historial_cambios")
 }
+
+// ---------------------------------------------------------------------------
+// Métricas de uso
+// ---------------------------------------------------------------------------
+
+/// Una fila por cada llamada a /api/directorio/search (spec no la pedía —
+/// es para que el admin sepa si el sitio se está usando). `texto` se guarda
+/// normalizado (trim + minúsculas) para que el top de búsquedas agrupe bien;
+/// vacío significa "alguien cargó la página sin escribir nada todavía", que
+/// también cuenta como uso. No se guarda IP ni usuario: es anónimo a propósito.
+model BusquedaLog {
+  id         String   @id @default(cuid())
+  texto      String
+  resultados Int
+  fecha      DateTime @default(now())
+
+  @@index([fecha])
+  @@index([texto])
+  @@map("busquedas_log")
+}

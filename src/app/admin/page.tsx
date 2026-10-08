@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { obtenerIndicadoresDashboard } from "@/server/services/dashboard.service";
 import { obtenerCambiosRecientes } from "@/server/services/historial.service";
+import { obtenerEstadisticasBusqueda } from "@/server/services/metricas.service";
 import { Card, CardContent } from "@/components/ui/card";
 
 const ACCION_LABEL: Record<string, string> = {
@@ -13,9 +14,10 @@ const ACCION_LABEL: Record<string, string> = {
 };
 
 export default async function AdminDashboardPage() {
-  const [indicadores, cambios] = await Promise.all([
+  const [indicadores, cambios, uso] = await Promise.all([
     obtenerIndicadoresDashboard(),
     obtenerCambiosRecientes(15),
+    obtenerEstadisticasBusqueda(),
   ]);
 
   const tarjetas = [
@@ -50,6 +52,48 @@ export default async function AdminDashboardPage() {
           </Card>
         </Link>
       </div>
+
+      <div>
+        <h2 className="mb-3 font-semibold">Uso del sitio</h2>
+        <div className="grid grid-cols-3 gap-3">
+          <Card>
+            <CardContent>
+              <p className="text-xs text-muted">Búsquedas hoy</p>
+              <p className="text-3xl font-bold text-primary">{uso.hoy}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <p className="text-xs text-muted">Últimos 7 días</p>
+              <p className="text-3xl font-bold text-primary">{uso.semana}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent>
+              <p className="text-xs text-muted">Total histórico</p>
+              <p className="text-3xl font-bold text-primary">{uso.total}</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      <Card>
+        <CardContent>
+          <h2 className="mb-3 font-semibold">Qué está buscando la gente</h2>
+          {uso.topBusquedas.length === 0 ? (
+            <p className="text-sm text-muted">Todavía no hay suficientes búsquedas con texto.</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-border">
+              {uso.topBusquedas.map((b) => (
+                <li key={b.texto} className="flex items-center justify-between py-2 text-sm">
+                  <span>{b.texto}</span>
+                  <span className="text-muted">{b.veces} veces</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardContent>

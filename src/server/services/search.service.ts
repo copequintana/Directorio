@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db/prisma";
+import { registrarBusqueda } from "@/server/services/metricas.service";
 import type { SearchQuery, SearchResultItem } from "@/server/domain/search";
 import type { Prisma } from "@/generated/prisma/client";
 
@@ -125,6 +126,8 @@ export async function buscarDirectorio(filtros: SearchQuery) {
         : null,
     };
   });
+
+  await registrarBusqueda(q, total);
 
   return { items, total, page: filtros.page, pageSize: filtros.pageSize };
 }

@@ -17,3 +17,8 @@ export const asignacionInputSchema = z.object({
   observaciones: z.string().optional().nullable(),
 });
 export type AsignacionInput = z.infer<typeof asignacionInputSchema>;
+
+export const completarUbicacionSchema = z.object({
+  ubicacionId: z.string().min(1, "La ubicación es requerida"),
+});
+export type CompletarUbicacionInput = z.infer<typeof completarUbicacionSchema>;

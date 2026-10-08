@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { prismaMock } from "@/test/prisma-mock";
-import { actualizarAsignacion, crearAsignacion, eliminarAsignacion } from "@/server/services/asignacion.service";
+import {
+  actualizarAsignacion,
+  asignarUbicacionATodasSinUbicacion,
+  crearAsignacion,
+  eliminarAsignacion,
+} from "@/server/services/asignacion.service";
 import { ServiceError } from "@/server/infrastructure/errors";
 
 const USUARIO_ID = "usuario-1";
@@ -135,6 +140,45 @@ describe("actualizarAsignacion", () => {
     await expect(
       actualizarAsignacion("otra-extension", "asig-1", { areaId: "x" }, USUARIO_ID),
     ).rejects.toThrow(ServiceError);
+  });
+});
+
+describe("asignarUbicacionATodasSinUbicacion", () => {
+  it("solo toca las asignaciones activas sin ubicación, no las que ya tienen una", async () => {
+    prismaMock.ubicacion.findUnique.mockResolvedValue({
+      id: "ubic-desconocida",
+      edificioId: "edif-1",
+      tipo: "OTRO",
+      nombre: "Ubicación desconocida",
+      numero: null,
+      piso: null,
+      descripcion: null,
+      activo: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+    const pendientes = [
+      { id: "asig-a", extensionId: "ext-a", ubicacionId: null },
+      { id: "asig-b", extensionId: "ext-b", ubicacionId: null },
+    ];
+    prismaMock.asignacionExtension.findMany.mockResolvedValue(pendientes as never);
+    prismaMock.asignacionExtension.update.mockResolvedValue({} as never);
+
+    const resultado = await asignarUbicacionATodasSinUbicacion("ubic-desconocida", USUARIO_ID);
+
+    expect(resultado.actualizadas).toBe(2);
+    expect(prismaMock.asignacionExtension.findMany).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { activo: true, ubicacionId: null } }),
+    );
+    expect(prismaMock.asignacionExtension.update).toHaveBeenCalledTimes(2);
+    expect(prismaMock.historialCambios.create).toHaveBeenCalledTimes(2);
+  });
+
+  it("rechaza si la ubicación no existe", async () => {
+    prismaMock.ubicacion.findUnique.mockResolvedValue(null);
+    await expect(asignarUbicacionATodasSinUbicacion("no-existe", USUARIO_ID)).rejects.toThrow(
+      ServiceError,
+    );
   });
 });
 

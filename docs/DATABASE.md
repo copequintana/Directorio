@@ -64,6 +64,13 @@ edición normales, que sí quedan en `HistorialCambios`.
   repo, igual que el logo, no se sube dinámicamente). `mapaX`/`mapaY` son
   porcentaje (0-100) sobre esa imagen, no píxeles, para no desalinearse si
   se reescala.
+- **`BusquedaLog`** — tampoco pedida por el documento: una fila por cada
+  llamada a `/api/directorio/search`, para que `/admin` muestre si el sitio
+  se está usando (búsquedas hoy/semana/total) y qué está buscando la gente.
+  `texto` se guarda normalizado (trim + minúsculas) para que "Calidad" y
+  "calidad" cuenten como la misma búsqueda. No guarda IP ni usuario — es
+  anónimo a propósito. Registrar falla en silencio (`metricas.service.ts`):
+  un error ahí nunca debe tumbar una búsqueda real.
 
 ## Reglas de negocio y dónde se aplican
 

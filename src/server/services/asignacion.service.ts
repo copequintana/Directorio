@@ -99,6 +99,47 @@ export async function actualizarAsignacion(
   });
 }
 
+export function contarAsignacionesSinUbicacion() {
+  return prisma.asignacionExtension.count({ where: { activo: true, ubicacionId: null } });
+}
+
+/**
+ * Pone `ubicacionId` en todas las asignaciones activas que no tienen
+ * ninguna — útil para cerrar la brecha con un marcador explícito (p. ej.
+ * "Ubicación desconocida" dentro de un edificio real) en vez de dejarlas
+ * sin ubicación indefinidamente. No toca las que ya tienen una.
+ */
+export async function asignarUbicacionATodasSinUbicacion(ubicacionId: string, usuarioId: string) {
+  return prisma.$transaction(
+    async (tx: Prisma.TransactionClient) => {
+      const ubicacion = await tx.ubicacion.findUnique({ where: { id: ubicacionId } });
+      if (!ubicacion) throw new ServiceError(404, "Ubicación no encontrada.");
+
+      const pendientes = await tx.asignacionExtension.findMany({
+        where: { activo: true, ubicacionId: null },
+      });
+
+      for (const anterior of pendientes) {
+        const actualizada = await tx.asignacionExtension.update({
+          where: { id: anterior.id },
+          data: { ubicacionId },
+        });
+        await registrarHistorial(tx, {
+          entidad: "AsignacionExtension",
+          entidadId: anterior.id,
+          accion: "ACTUALIZAR",
+          valoresAnteriores: anterior,
+          valoresNuevos: actualizada,
+          usuarioId,
+        });
+      }
+
+      return { actualizadas: pendientes.length };
+    },
+    { timeout: 120_000 },
+  );
+}
+
 /** Termina una asignación sin borrarla (fechaFin), preservando el historial. */
 export async function eliminarAsignacion(
   extensionId: string,
