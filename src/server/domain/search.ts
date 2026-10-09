@@ -2,7 +2,7 @@ import { z } from "zod";
 import { ESTADOS_EXTENSION } from "./extension";
 
 export const searchQuerySchema = z.object({
-  q: z.string().trim().default(""),
+  q: z.string().trim().max(200, "La búsqueda es demasiado larga").default(""),
   campusId: z.string().optional(),
   areaId: z.string().optional(),
   edificioId: z.string().optional(),

@@ -23,7 +23,7 @@ export type ExtensionInput = z.infer<typeof extensionInputSchema>;
 export const extensionListQuerySchema = z.object({
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(100).default(20),
-  q: z.string().optional(),
+  q: z.string().max(200).optional(),
   campusId: z.string().optional(),
   areaId: z.string().optional(),
   edificioId: z.string().optional(),
